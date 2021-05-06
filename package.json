@@ -1,0 +1,21 @@
+{
+  "name": "overlaps-remove",
+  "version": "0.0.1",
+  "description": "remove overlaps in a graph",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "Marcus Schreiter (marcusand)",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/preset-env": "^7.14.1",
+    "@babel/preset-typescript": "^7.13.0",
+    "@typescript-eslint/eslint-plugin": "^4.22.1",
+    "@typescript-eslint/parser": "^4.22.1",
+    "eslint": "^7.25.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.2.4"
+  }
+}
