@@ -15,15 +15,15 @@ import {
 
 const weightDefaults: Weights = {
   leaderLineLength: 0.1,
-  leaderLineIntersection: 1,
-  labelLabelOverlap: 100,
+  leaderLineIntersection: 0.1,
+  labelLabelOverlap: 30,
   labelAnchorOverlap: 30,
   labelAnchorRootOverlap: 30,
   orientationBias: 3,
   outOfBounds: 5000,
 };
 
-const maxMove = 1000;
+const maxMove = 2000;
 const maxAngle = 360;
 
 export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemoveReturn {
