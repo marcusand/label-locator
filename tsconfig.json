@@ -8,6 +8,7 @@
     "target": "es6",
     "sourceMap": true,
     "moduleResolution": "node",
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "isolatedModules": true,
   },
 }
