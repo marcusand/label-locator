@@ -7,9 +7,9 @@ const labels = [
 ];
 
 const anchors = [
-  { x: 0, y: 0, r: 1 },
-  { x: 30, y: 30, r: 1 },
-  { x: 60, y: 60, r: 1 },
+  { x: 0, y: 0, length: 1 },
+  { x: 30, y: 30, length: 1 },
+  { x: 60, y: 60, length: 1 },
 ];
 
 describe("overlaps remove", () => {
