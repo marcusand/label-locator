@@ -4,7 +4,14 @@
   "description": "remove overlaps in a graph",
   "main": "src/index.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "jest --watch"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
   },
   "author": "Marcus Schreiter (marcusand)",
   "license": "MIT",
@@ -12,10 +19,13 @@
     "@babel/core": "^7.14.0",
     "@babel/preset-env": "^7.14.1",
     "@babel/preset-typescript": "^7.13.0",
+    "@types/jest": "^26.0.23",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
+    "babel-jest": "^27.0.5",
     "eslint": "^7.25.0",
     "eslint-config-prettier": "^8.3.0",
+    "jest": "^27.0.5",
     "typescript": "^4.2.4"
   }
 }
