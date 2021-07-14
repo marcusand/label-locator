@@ -19,7 +19,6 @@ const weightDefaults: Weights = {
   labelLabelOverlap: 30,
   labelAnchorOverlap: 30,
   labelAnchorRootOverlap: 30,
-  orientationBias: 3,
   outOfBounds: 5000,
 };
 
@@ -32,6 +31,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
   const containerPadding = args.containerPadding || [0, 0, 0, 0];
   const labelMargin = args.labelMargin || 0;
   const weights = { ...weightDefaults, ...args.weights };
+  const hardwallBoundaries = args.hardwallBoundaries === false ? false : true;
   const { containerWidth, containerHeight } = args;
 
   const isOutOfBounds = (index: number): boolean => {
@@ -112,7 +112,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     );
   };
 
-  const energy = (index: number): number => {
+  const energy = (index: number, energyFactor?: number): number => {
     const label = labels[index];
     const anchor = anchors[index];
     let energy = 0;
@@ -136,15 +136,26 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     // label orientation penalty
     // const dx = (label.x - anchor.x) / anchorLabelDistance;
     // const dy = (label.y - anchor.y) / anchorLabelDistance;
+    // const orientationX = 10 / Math.abs(dx);
+    // const orientationY = 10 / Math.abs(dy);
+
+    // if (orientationX && orientationY) {
+    //   energy += orientationX;
+    //   energy += orientationY;
+    // }
+
+    // if (dx === 0 || dy === 0) {
+    //   energy += 300;
+    // }
 
     // if (dx > 0 && dy > 0) {
-    //   energy += weights.orientationBias;
+    //   energy += weights.orientation.left;
     // } else if (dx < 0 && dy > 0) {
-    //   energy += weights.orientationBias;
+    //   energy += weights.orientation.bottom;
     // } else if (dx < 0 && dy < 0) {
-    //   energy += weights.orientationBias;
+    //   energy += weights.orientation.right;
     // } else {
-    //   energy += weights.orientationBias;
+    //   energy += weights.orientation.right;
     // }
 
     labels.forEach((currLabel, i) => {
@@ -165,6 +176,8 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
       if (hasIntersection) energy += weights.leaderLineIntersection;
     });
 
+    if (energyFactor >= 0) energy *= energyFactor;
+
     return energy;
   };
 
@@ -176,18 +189,19 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     const label = labels[index];
     const xOld = label.x;
     const yOld = label.y;
-    const oldEnergy = energy(index);
+    let oldEnergy = energy(index);
 
     if (transformation === "move") move(index);
     if (transformation === "rotate") rotate(index);
 
-    const newEnergy = energy(index);
+    const newEnergy = energy(index, label.energyFactor);
     const deltaEnergy = newEnergy - oldEnergy;
 
     const e = Math.exp(-deltaEnergy / currT);
     const condition = Math.random() >= e;
+    const oob = hardwallBoundaries ? isOutOfBounds(index) : false;
 
-    if (condition) {
+    if (condition || oob) {
       label.x = xOld;
       label.y = yOld;
     }

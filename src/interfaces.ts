@@ -22,6 +22,7 @@ export interface Label {
   y: number;
   width: number;
   height: number;
+  energyFactor?: number;
 }
 
 export interface Anchor {
@@ -36,7 +37,6 @@ export interface Weights {
   labelLabelOverlap?: number;
   labelAnchorOverlap?: number;
   labelAnchorRootOverlap?: number;
-  orientationBias?: number;
   outOfBounds?: number;
 }
 
@@ -45,6 +45,7 @@ export interface OverlapsRemoveArgs {
   anchors: Array<Anchor>;
   containerWidth: number;
   containerHeight: number;
+  hardwallBoundaries?: boolean;
   containerPadding?: Array<number>;
   labelMargin?: number;
   weights?: Weights;
