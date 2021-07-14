@@ -65,10 +65,10 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     const anchor = anchors[index];
 
     return (
-      anchor.x >= label.x &&
-      anchor.x <= label.x + label.width &&
-      anchor.y >= label.y &&
-      anchor.y <= label.y + label.height
+      anchor.x >= label.x - labelMargin &&
+      anchor.x <= label.x + label.width + labelMargin &&
+      anchor.y >= label.y - labelMargin &&
+      anchor.y <= label.y + label.height + labelMargin
     );
   };
 
@@ -189,7 +189,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     const label = labels[index];
     const xOld = label.x;
     const yOld = label.y;
-    let oldEnergy = energy(index);
+    const oldEnergy = energy(index);
 
     if (transformation === "move") move(index);
     if (transformation === "rotate") rotate(index);
