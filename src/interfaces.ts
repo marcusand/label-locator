@@ -49,6 +49,7 @@ export interface OverlapsRemoveArgs {
   containerPadding?: Array<number>;
   labelMargin?: number;
   weights?: Weights;
+  maxMove?: number;
 }
 
 export interface needsUpdateArgs {

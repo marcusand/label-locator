@@ -22,14 +22,12 @@ const weightDefaults: Weights = {
   outOfBounds: 5000,
 };
 
-const maxMove = 2000;
-const maxAngle = 360;
-
 export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemoveReturn {
   const labels = args.labels.map((label) => ({ ...label }));
   const anchors = args.anchors.map((anchor) => ({ ...anchor }));
   const containerPadding = args.containerPadding || [0, 0, 0, 0];
   const labelMargin = args.labelMargin || 0;
+  const maxMove = args.maxMove || 200;
   const weights = { ...weightDefaults, ...args.weights };
   const hardwallBoundaries = args.hardwallBoundaries === false ? false : true;
   const { containerWidth, containerHeight } = args;
@@ -120,7 +118,21 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     );
   };
 
-  const energy = (index: number, energyFactor?: number): number => {
+  const hasValidPosition = (index: number): boolean => {
+    const label = labels[index];
+    const anchor = anchors[index];
+
+    const dimensionX = label.x < anchor.x ? label.width : 0;
+    const dimensionY = label.y < anchor.y ? label.height : 0;
+
+    const dx = Math.abs(label.x + dimensionX - anchor.x);
+    const dy = Math.abs(label.y + dimensionY - anchor.y);
+    const a = Math.round(dx) === Math.round(dy);
+
+    return a;
+  };
+
+  const energy = (index: number): number => {
     const label = labels[index];
     const anchor = anchors[index];
     let energy = 0;
@@ -131,7 +143,11 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     );
 
     // label length penalty
-    energy += Math.abs(anchor.length - anchorLabelDistance) * weights.leaderLineLength;
+    if (anchorLabelDistance === 0) {
+      energy += Math.pow(weights.leaderLineLength, 3);
+    } else {
+      energy += anchorLabelDistance * weights.leaderLineLength;
+    }
 
     // out ouf bounds penalty
     if (isOutOfBounds(index)) {
@@ -140,31 +156,6 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
 
     // label anchor root penalty
     energy += getLabelAnchorRootOverlap(index) * weights.labelAnchorRootOverlap;
-
-    // label orientation penalty
-    // const dx = (label.x - anchor.x) / anchorLabelDistance;
-    // const dy = (label.y - anchor.y) / anchorLabelDistance;
-    // const orientationX = 10 / Math.abs(dx);
-    // const orientationY = 10 / Math.abs(dy);
-
-    // if (orientationX && orientationY) {
-    //   energy += orientationX;
-    //   energy += orientationY;
-    // }
-
-    // if (dx === 0 || dy === 0) {
-    //   energy += 300;
-    // }
-
-    // if (dx > 0 && dy > 0) {
-    //   energy += weights.orientation.left;
-    // } else if (dx < 0 && dy > 0) {
-    //   energy += weights.orientation.bottom;
-    // } else if (dx < 0 && dy < 0) {
-    //   energy += weights.orientation.right;
-    // } else {
-    //   energy += weights.orientation.right;
-    // }
 
     labels.forEach((currLabel, i) => {
       if (index === i) return;
@@ -184,32 +175,37 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
       if (hasIntersection) energy += weights.leaderLineIntersection;
     });
 
-    if (energyFactor >= 0) energy *= energyFactor;
-
     return energy;
   };
 
-  type Transformation = "move" | "rotate";
-
-  const transform = (currT: number, transformation: Transformation): void => {
+  const transform = (currT: number): void => {
     // select random label
     const index = getRandomIndex(labels.length);
     const label = labels[index];
     const xOld = label.x;
     const yOld = label.y;
-    const oldEnergy = energy(index);
+    const validPosition = hasValidPosition(index);
+    let oldEnergy = energy(index);
 
-    if (transformation === "move") move(index);
-    if (transformation === "rotate") rotate(index);
+    if (!validPosition) {
+      oldEnergy *= 5;
+    }
 
-    const newEnergy = energy(index, label.energyFactor);
+    move(index);
+
+    let newEnergy = energy(index);
+
+    if (label.energyFactor) {
+      newEnergy *= label.energyFactor;
+    }
+
     const deltaEnergy = newEnergy - oldEnergy;
 
     const e = Math.exp(-deltaEnergy / currT);
     const condition = Math.random() >= e;
     const oob = hardwallBoundaries ? isOutOfBounds(index) : false;
 
-    if (condition || oob) {
+    if (oob || condition) {
       label.x = xOld;
       label.y = yOld;
     }
@@ -217,30 +213,16 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
 
   const move = (index: number): void => {
     const label = labels[index];
-
-    label.x -= (Math.random() - 0.5) * maxMove;
-    label.y += (Math.random() - 0.5) * maxMove;
-  };
-
-  const rotate = (index: number): void => {
-    const label = labels[index];
     const anchor = anchors[index];
+    const move = Math.random() * maxMove;
+    const signX = Math.random() > 0.5 ? 1 : -1;
+    const signY = Math.random() > 0.5 ? 1 : -1;
 
-    const angle = Math.random() * maxAngle;
-    const s = Math.sin(angle);
-    const c = Math.cos(angle);
+    const dimensionX = signX === -1 ? label.width : 0;
+    const dimensionY = signY === -1 ? label.height : 0;
 
-    // translate label (relative to anchor at origin):
-    label.x = label.x - anchor.x;
-    label.y = label.x - anchor.y;
-
-    // rotate label
-    const xNew = label.x * c - label.y * s;
-    const yNew = label.x * s + label.y * c;
-
-    // translate label back
-    label.x = xNew + anchor.x;
-    label.y = yNew + anchor.y;
+    label.x = anchor.x + signX * (move + dimensionX);
+    label.y = anchor.y + signY * (move + dimensionY);
   };
 
   const start = (sweeps: number) => {
@@ -249,7 +231,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
 
     for (let a = 0; a < sweeps; a++) {
       for (let b = 0; b < labels.length; b++) {
-        transform(currT, Math.random() < 0.5 ? "move" : "rotate");
+        transform(currT);
       }
       currT = coolingSchedule(currT, initialT, sweeps);
     }
