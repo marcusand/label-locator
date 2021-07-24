@@ -143,7 +143,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     );
 
     // label length penalty
-    if (anchorLabelDistance === 0) {
+    if (anchorLabelDistance < 10) {
       energy += Math.pow(weights.leaderLineLength, 3);
     } else {
       energy += anchorLabelDistance * weights.leaderLineLength;
