@@ -60,15 +60,23 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     return false;
   };
 
-  const hasLabelAnchorRootOverlap = (index: number): boolean => {
+  const getLabelAnchorRootOverlap = (index: number): number => {
     const label = labels[index];
     const anchor = anchors[index];
 
-    return (
-      anchor.x >= label.x - labelMargin &&
-      anchor.x <= label.x + label.width + labelMargin &&
-      anchor.y >= label.y - labelMargin &&
-      anchor.y <= label.y + label.height + labelMargin
+    return rectOverlap(
+      {
+        x1: label.x - labelMargin,
+        y1: label.y - labelMargin,
+        x2: label.x + label.width + labelMargin,
+        y2: label.y + label.height + labelMargin,
+      },
+      {
+        x1: anchor.x - anchor.length,
+        y1: anchor.y - anchor.length,
+        x2: anchor.x + anchor.length,
+        y2: anchor.y + anchor.length,
+      },
     );
   };
 
@@ -131,7 +139,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     }
 
     // label anchor root penalty
-    if (hasLabelAnchorRootOverlap(index)) energy += weights.labelAnchorRootOverlap;
+    energy += getLabelAnchorRootOverlap(index) * weights.labelAnchorRootOverlap;
 
     // label orientation penalty
     // const dx = (label.x - anchor.x) / anchorLabelDistance;
