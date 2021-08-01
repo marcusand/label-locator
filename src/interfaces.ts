@@ -44,7 +44,6 @@ export interface OverlapsRemoveArgs {
   anchors: Array<Anchor>;
   containerWidth: number;
   containerHeight: number;
-  hardwallBoundaries?: boolean;
   containerPadding?: Array<number>;
   labelMargin?: number;
   anchorMargin?: number;

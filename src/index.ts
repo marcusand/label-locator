@@ -25,7 +25,6 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
   const anchorMargin = args.anchorMargin ?? 0;
   const maxMove = args.maxMove ?? 200;
   const weights = { ...weightDefaults, ...args.weights };
-  const hardwallBoundaries = args.hardwallBoundaries === false ? false : true;
   const { containerWidth, containerHeight } = args;
 
   const isOutOfBounds = (index: number): boolean => {
