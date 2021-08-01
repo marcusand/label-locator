@@ -1,5 +1,4 @@
 import { Weights, OverlapsRemoveArgs, OverlapsRemoveReturn } from "./interfaces";
-
 import { rectOverlap, coolingSchedule, lineIntersect, getRandomIndex } from "./lib";
 
 const weightDefaults: Weights = {
@@ -156,7 +155,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
 
       energy += labelLabelOverlap * weights.labelLabelOverlap;
       energy += labelAnchorOverlap * weights.labelAnchorOverlap;
-      if (hasIntersection) energy += weights.leaderLineIntersection;
+      // if (hasIntersection) energy += weights.leaderLineIntersection;
     });
 
     // check if valid position
