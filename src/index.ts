@@ -18,16 +18,17 @@ const weightDefaults: Weights = {
   leaderLineIntersection: 0.1,
   labelLabelOverlap: 30,
   labelAnchorOverlap: 30,
-  labelAnchorRootOverlap: 30,
+  labelOwnAnchorOverlap: 30,
   outOfBounds: 5000,
 };
 
 export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemoveReturn {
   const labels = args.labels.map((label) => ({ ...label }));
   const anchors = args.anchors.map((anchor) => ({ ...anchor }));
-  const containerPadding = args.containerPadding || [0, 0, 0, 0];
-  const labelMargin = args.labelMargin || 0;
-  const maxMove = args.maxMove || 200;
+  const containerPadding = args.containerPadding ?? [0, 0, 0, 0];
+  const labelMargin = args.labelMargin ?? 0;
+  const anchorMargin = args.anchorMargin ?? 0;
+  const maxMove = args.maxMove ?? 200;
   const weights = { ...weightDefaults, ...args.weights };
   const hardwallBoundaries = args.hardwallBoundaries === false ? false : true;
   const { containerWidth, containerHeight } = args;
@@ -58,9 +59,12 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     return false;
   };
 
-  const getLabelAnchorRootOverlap = (index: number): number => {
-    const label = labels[index];
-    const anchor = anchors[index];
+  const getLabelAnchorRootOverlap = (
+    indexLabel: number,
+    indexAnchor?: number,
+  ): number => {
+    const label = labels[indexLabel];
+    const anchor = anchors[indexAnchor ?? indexLabel];
 
     return rectOverlap(
       {
@@ -70,10 +74,10 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
         y2: label.y + label.height + labelMargin,
       },
       {
-        x1: anchor.x - anchor.length,
-        y1: anchor.y - anchor.length,
-        x2: anchor.x + anchor.length,
-        y2: anchor.y + anchor.length,
+        x1: anchor.x - anchorMargin,
+        y1: anchor.y - anchorMargin,
+        x2: anchor.x + anchorMargin,
+        y2: anchor.y + anchorMargin,
       },
     );
   };
@@ -98,38 +102,33 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     );
   };
 
-  const getLabelAnchorOverlap = (indexLabel: number, indexAnchor: number): number => {
-    const label = labels[indexLabel];
-    const anchor = anchors[indexAnchor];
+  const getLabelAnchorDx = (index: number) => {
+    const label = labels[index];
+    const anchor = anchors[index];
+    const dimensionX = label.x < anchor.x ? label.width : 0;
 
-    return rectOverlap(
-      {
-        x1: label.x - labelMargin,
-        y1: label.y - labelMargin,
-        x2: label.x + label.width + labelMargin,
-        y2: label.y + label.height + labelMargin,
-      },
-      {
-        x1: anchor.x - anchor.length,
-        y1: anchor.y - anchor.length,
-        x2: anchor.x + anchor.length,
-        y2: anchor.y + anchor.length,
-      },
-    );
+    return Math.abs(label.x + dimensionX - anchor.x);
+  };
+
+  const getLabelAnchorDy = (index: number) => {
+    const label = labels[index];
+    const anchor = anchors[index];
+    const dimensionY = label.y < anchor.y ? label.height : 0;
+
+    return Math.abs(label.y + dimensionY - anchor.y);
+  };
+
+  const getLabelAnchorDistance = (index: number) => {
+    const dx = getLabelAnchorDx(index);
+    const dy = getLabelAnchorDx(index);
+
+    return Math.sqrt(dx * dx + dy * dy);
   };
 
   const hasValidPosition = (index: number): boolean => {
-    const label = labels[index];
-    const anchor = anchors[index];
-
-    const dimensionX = label.x < anchor.x ? label.width : 0;
-    const dimensionY = label.y < anchor.y ? label.height : 0;
-
-    const dx = Math.abs(label.x + dimensionX - anchor.x);
-    const dy = Math.abs(label.y + dimensionY - anchor.y);
-    const a = Math.round(dx) === Math.round(dy);
-
-    return a;
+    const dx = getLabelAnchorDx(index);
+    const dy = getLabelAnchorDy(index);
+    return Math.round(dx) === Math.round(dy);
   };
 
   const energy = (index: number): number => {
@@ -137,17 +136,10 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     const anchor = anchors[index];
     let energy = 0;
 
-    const anchorLabelDistance = distance(
-      { x: label.x, y: label.y },
-      { x: anchor.x, y: anchor.y },
-    );
+    const anchorLabelDistance = getLabelAnchorDistance(index);
 
     // label length penalty
-    if (anchorLabelDistance < 10) {
-      energy += Math.pow(weights.leaderLineLength, 3);
-    } else {
-      energy += anchorLabelDistance * weights.leaderLineLength;
-    }
+    energy += anchorLabelDistance * weights.leaderLineLength;
 
     // out ouf bounds penalty
     if (isOutOfBounds(index)) {
@@ -155,7 +147,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     }
 
     // label anchor root penalty
-    energy += getLabelAnchorRootOverlap(index) * weights.labelAnchorRootOverlap;
+    energy += getLabelAnchorRootOverlap(index) * weights.labelOwnAnchorOverlap;
 
     labels.forEach((currLabel, i) => {
       if (index === i) return;
@@ -168,12 +160,17 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
       );
 
       const labelLabelOverlap = getLabelLabelOverlap(index, i);
-      const labelAnchorOverlap = getLabelAnchorOverlap(index, i);
+      const labelAnchorOverlap = getLabelAnchorRootOverlap(index, i);
 
       energy += labelLabelOverlap * weights.labelLabelOverlap;
       energy += labelAnchorOverlap * weights.labelAnchorOverlap;
       if (hasIntersection) energy += weights.leaderLineIntersection;
     });
+
+    // check if valid position
+    if (!hasValidPosition(index)) {
+      energy *= 30;
+    }
 
     return energy;
   };
@@ -184,12 +181,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     const label = labels[index];
     const xOld = label.x;
     const yOld = label.y;
-    const validPosition = hasValidPosition(index);
-    let oldEnergy = energy(index);
-
-    if (!validPosition) {
-      oldEnergy *= 5;
-    }
+    const oldEnergy = energy(index);
 
     move(index);
 
@@ -203,9 +195,8 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
 
     const e = Math.exp(-deltaEnergy / currT);
     const condition = Math.random() >= e;
-    const oob = hardwallBoundaries ? isOutOfBounds(index) : false;
 
-    if (oob || condition) {
+    if (condition) {
       label.x = xOld;
       label.y = yOld;
     }
