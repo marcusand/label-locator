@@ -6,8 +6,15 @@ It uses simulated annealing and is heavily inspired by [D3-Labeler](https://gith
 
 In contrast to D3-Labeler this library is written in Typescript, does not mutate its input data and is not bound to any specific rendering library.
 
+## Install
+```
+npm install label-locator
+```
+
 ## Usage
 ```js
+    import labelLocator from 'label-locator';
+    
     const labels = [
       {
         x: 10, 
