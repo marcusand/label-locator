@@ -1,8 +1,8 @@
 {
-  "name": "overlaps-remove",
+  "name": "label-locator",
   "version": "0.0.1",
-  "description": "remove overlaps in a graph",
-  "main": "src/index.ts",
+  "description": "Automatically place labels in a graph.",
+  "main": "build/index.js",
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
