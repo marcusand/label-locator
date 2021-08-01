@@ -2,7 +2,7 @@ import { Weights, OverlapsRemoveArgs, OverlapsRemoveReturn } from "./interfaces"
 import { rectOverlap, coolingSchedule, getRandomIndex } from "./lib";
 
 const weightDefaults: Weights = {
-  leaderLineLength: 0.1,
+  labelAnchorDistance: 0.1,
   labelLabelOverlap: 30,
   labelAnchorOverlap: 30,
   labelOwnAnchorOverlap: 30,
@@ -127,7 +127,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     );
 
     // label length penalty
-    energy += deviationFromPreferredDistance * weights.leaderLineLength;
+    energy += deviationFromPreferredDistance * weights.labelAnchorDistance;
 
     // out ouf bounds penalty
     if (isOutOfBounds(index)) {

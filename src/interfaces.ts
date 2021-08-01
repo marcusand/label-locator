@@ -19,7 +19,7 @@ export interface Anchor {
 }
 
 export interface Weights {
-  leaderLineLength?: number;
+  labelAnchorDistance?: number;
   labelLabelOverlap?: number;
   labelAnchorOverlap?: number;
   labelOwnAnchorOverlap?: number;
