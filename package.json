@@ -1,6 +1,6 @@
 {
   "name": "label-locator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Automatically place labels in a graph.",
   "main": "build/index.js",
   "scripts": {
