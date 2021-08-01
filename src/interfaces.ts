@@ -43,7 +43,8 @@ export interface OverlapsRemoveArgs {
   labelMargin?: number;
   anchorMargin?: number;
   weights?: Weights;
-  maxMove?: number;
+  maxDistance?: number;
+  preferredDistance?: number;
 }
 
 export interface OverlapsRemoveReturn {

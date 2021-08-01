@@ -17,7 +17,8 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
   const containerPadding = args.containerPadding ?? [0, 0, 0, 0];
   const labelMargin = args.labelMargin ?? 0;
   const anchorMargin = args.anchorMargin ?? 0;
-  const maxMove = args.maxMove ?? 200;
+  const maxDistance = args.maxDistance ?? 200;
+  const preferredDistance = args.preferredDistance ?? maxDistance / 2;
   const weights = { ...weightDefaults, ...args.weights };
   const { containerWidth, containerHeight } = args;
 
@@ -125,9 +126,12 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     let energy = 0;
 
     const anchorLabelDistance = getLabelAnchorDistance(index);
+    const deviationFromPreferredDistance = Math.abs(
+      anchorLabelDistance - preferredDistance,
+    );
 
     // label length penalty
-    energy += anchorLabelDistance * weights.leaderLineLength;
+    energy += deviationFromPreferredDistance * weights.leaderLineLength;
 
     // out ouf bounds penalty
     if (isOutOfBounds(index)) {
@@ -193,7 +197,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
   const move = (index: number): void => {
     const label = labels[index];
     const anchor = anchors[index];
-    const move = Math.random() * maxMove;
+    const move = Math.random() * maxDistance;
     const signX = Math.random() > 0.5 ? 1 : -1;
     const signY = Math.random() > 0.5 ? 1 : -1;
 
