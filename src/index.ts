@@ -1,9 +1,8 @@
 import { Weights, OverlapsRemoveArgs, OverlapsRemoveReturn } from "./interfaces";
-import { rectOverlap, coolingSchedule, lineIntersect, getRandomIndex } from "./lib";
+import { rectOverlap, coolingSchedule, getRandomIndex } from "./lib";
 
 const weightDefaults: Weights = {
   leaderLineLength: 0.1,
-  leaderLineIntersection: 0.1,
   labelLabelOverlap: 30,
   labelAnchorOverlap: 30,
   labelOwnAnchorOverlap: 30,
@@ -120,8 +119,6 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
   };
 
   const energy = (index: number): number => {
-    const label = labels[index];
-    const anchor = anchors[index];
     let energy = 0;
 
     const anchorLabelDistance = getLabelAnchorDistance(index);
@@ -140,22 +137,14 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     // label anchor root penalty
     energy += getLabelAnchorRootOverlap(index) * weights.labelOwnAnchorOverlap;
 
-    labels.forEach((currLabel, i) => {
+    labels.forEach((label, i) => {
       if (index === i) return;
-
-      const currAnchor = anchors[i];
-
-      const hasIntersection = lineIntersect(
-        { x1: anchor.x, y1: anchor.y, x2: label.x, y2: label.y },
-        { x1: currAnchor.x, y1: currAnchor.y, x2: currLabel.x, y2: currLabel.y },
-      );
 
       const labelLabelOverlap = getLabelLabelOverlap(index, i);
       const labelAnchorOverlap = getLabelAnchorRootOverlap(index, i);
 
       energy += labelLabelOverlap * weights.labelLabelOverlap;
       energy += labelAnchorOverlap * weights.labelAnchorOverlap;
-      // if (hasIntersection) energy += weights.leaderLineIntersection;
     });
 
     // check if valid position

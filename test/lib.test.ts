@@ -1,19 +1,10 @@
-import { Line, Rect } from "../src/interfaces";
-import { lineIntersect, rectOverlap } from "../src/lib";
-
-const lineA: Line = { x1: 0, y1: 0, x2: 5, y2: 5 };
-const lineB: Line = { x1: 1, y1: 0, x2: 5, y2: 10 };
-const lineC: Line = { x1: 2, y1: 0, x2: 5, y2: 4 };
+import { Rect } from "../src/interfaces";
+import { rectOverlap } from "../src/lib";
 
 const rectA: Rect = { x1: 0, y1: 0, x2: 5, y2: 5 };
 const rectB: Rect = { x1: 4, y1: 4, x2: 9, y2: 9 };
 const rectC: Rect = { x1: 5, y1: 5, x2: 10, y2: 10 };
 const rectD: Rect = { x1: 9, y1: 9, x2: 4, y2: 4 };
-
-describe("lineIntersect function", () => {
-  test("intersection", () => expect(lineIntersect(lineA, lineB)).toBe(true));
-  test("no intersection", () => expect(lineIntersect(lineA, lineC)).toBe(false));
-});
 
 describe("rectOverlap function", () => {
   test("overlap", () => expect(rectOverlap(rectA, rectB)).toBe(1));

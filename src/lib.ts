@@ -1,4 +1,4 @@
-import { Line, Rect } from "./interfaces";
+import { Rect } from "./interfaces";
 
 export function getRandomIndex(arrayLength: number): number {
   return Math.floor(Math.random() * arrayLength);
@@ -14,39 +14,6 @@ export function getRandomIndex(arrayLength: number): number {
  */
 export function coolingSchedule(currT: number, initialT: number, sweeps: number): number {
   return currT - initialT / sweeps;
-}
-
-/**
- *  returns true if two lines intersect, else false
- *  from http://paulbourke.net/geometry/lineline2d/
- *
- * @param lineA
- * @param lineB
- * @returns
- */
-export function lineIntersect(lineA: Line, lineB: Line): boolean {
-  const x1 = lineA.x1;
-  const x2 = lineA.x2;
-  const x3 = lineB.x1;
-  const x4 = lineB.x2;
-  const y1 = lineA.y1;
-  const y2 = lineA.y2;
-  const y3 = lineB.y1;
-  const y4 = lineB.y2;
-
-  const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
-  const numera = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
-  const numerb = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3);
-
-  /* Is the intersection along the the segments */
-  const mua = numera / denom;
-  const mub = numerb / denom;
-
-  if (!(mua < 0 || mua > 1 || mub < 0 || mub > 1)) {
-    return true;
-  }
-
-  return false;
 }
 
 /**
