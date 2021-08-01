@@ -37,6 +37,7 @@ export interface OverlapsRemoveArgs {
   weights?: Weights;
   maxDistance?: number;
   preferredDistance?: number;
+  onlyMoveOrthogonally?: boolean;
 }
 
 export interface OverlapsRemoveReturn {

@@ -17,6 +17,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
   const anchorMargin = args.anchorMargin ?? 0;
   const maxDistance = args.maxDistance ?? 200;
   const preferredDistance = args.preferredDistance ?? maxDistance / 2;
+  const onlyMoveOrthogonally = args.onlyMoveOrthogonally ?? true;
   const weights = { ...weightDefaults, ...args.weights };
   const { containerWidth, containerHeight } = args;
 
@@ -113,8 +114,11 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
   };
 
   const hasValidPosition = (index: number): boolean => {
+    if (!onlyMoveOrthogonally) return true;
+
     const dx = getLabelAnchorDx(index);
     const dy = getLabelAnchorDy(index);
+
     return Math.round(dx) === Math.round(dy);
   };
 
@@ -185,15 +189,16 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
   const move = (index: number): void => {
     const label = labels[index];
     const anchor = anchors[index];
-    const move = Math.random() * maxDistance;
+    const moveX = Math.random() * maxDistance;
+    const moveY = onlyMoveOrthogonally ? moveX : Math.random() * maxDistance;
     const signX = Math.random() > 0.5 ? 1 : -1;
     const signY = Math.random() > 0.5 ? 1 : -1;
 
     const dimensionX = signX === -1 ? label.width : 0;
     const dimensionY = signY === -1 ? label.height : 0;
 
-    label.x = anchor.x + signX * (move + dimensionX);
-    label.y = anchor.y + signY * (move + dimensionY);
+    label.x = anchor.x + signX * (moveX + dimensionX);
+    label.y = anchor.y + signY * (moveY + dimensionY);
   };
 
   const start = (sweeps: number) => {
