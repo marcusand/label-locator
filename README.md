@@ -53,4 +53,5 @@ In contrast to D3-Labeler this library is written in Typescript, does not mutate
     });
 
     const labelsWithUpdatedLocations = locator.start(1500);
-    ```
+
+```
