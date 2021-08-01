@@ -1,9 +1,4 @@
-import {
-  Weights,
-  OverlapsRemoveArgs,
-  OverlapsRemoveReturn,
-  needsUpdateArgs,
-} from "./interfaces";
+import { Weights, OverlapsRemoveArgs, OverlapsRemoveReturn } from "./interfaces";
 
 import {
   rectOverlap,
@@ -230,33 +225,7 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     return labels;
   };
 
-  const needsUpdate = (args: needsUpdateArgs): boolean => {
-    let highestEnergy = 0;
-    let totalEnergy = 0;
-
-    if (labels.length === 0) return false;
-
-    for (let index = 0; index < labels.length; index++) {
-      const labelEnergy = energy(index);
-
-      if (highestEnergy < labelEnergy) {
-        highestEnergy = labelEnergy;
-      }
-
-      totalEnergy += labelEnergy;
-    }
-
-    const averageEnergy = totalEnergy / labels.length;
-
-    if (args.monitor) {
-      console.log("average energy:", averageEnergy, "peak energy:", highestEnergy);
-    }
-
-    return highestEnergy > args.peakThreshold || averageEnergy > args.averageThreshold;
-  };
-
   return {
     start,
-    needsUpdate,
   };
 }

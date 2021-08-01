@@ -52,13 +52,6 @@ export interface OverlapsRemoveArgs {
   maxMove?: number;
 }
 
-export interface needsUpdateArgs {
-  peakThreshold: number;
-  averageThreshold: number;
-  monitor?: boolean;
-}
-
 export interface OverlapsRemoveReturn {
   start: (sweeps: number) => Array<Label>;
-  needsUpdate: (args: needsUpdateArgs) => boolean;
 }
