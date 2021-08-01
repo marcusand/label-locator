@@ -1,4 +1,4 @@
-import { Line, Point, Rect } from "./interfaces";
+import { Line, Rect } from "./interfaces";
 
 export function getRandomIndex(arrayLength: number): number {
   return Math.floor(Math.random() * arrayLength);
@@ -14,20 +14,6 @@ export function getRandomIndex(arrayLength: number): number {
  */
 export function coolingSchedule(currT: number, initialT: number, sweeps: number): number {
   return currT - initialT / sweeps;
-}
-
-/**
- * distance between two points
- *
- * @param pointA
- * @param pointB
- * @returns
- */
-export function distance(pointA: Point, pointB: Point): number {
-  const dx = pointA.x - pointB.x;
-  const dy = pointA.y - pointB.y;
-
-  return Math.sqrt(dx * dx + dy * dy);
 }
 
 /**

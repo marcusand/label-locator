@@ -1,12 +1,6 @@
 import { Weights, OverlapsRemoveArgs, OverlapsRemoveReturn } from "./interfaces";
 
-import {
-  rectOverlap,
-  coolingSchedule,
-  distance,
-  lineIntersect,
-  getRandomIndex,
-} from "./lib";
+import { rectOverlap, coolingSchedule, lineIntersect, getRandomIndex } from "./lib";
 
 const weightDefaults: Weights = {
   leaderLineLength: 0.1,

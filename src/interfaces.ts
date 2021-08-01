@@ -5,11 +5,6 @@ export interface Rect {
   y2: number;
 }
 
-export interface Point {
-  x: number;
-  y: number;
-}
-
 export interface Line {
   x1: number;
   y1: number;
