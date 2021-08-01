@@ -1,4 +1,4 @@
-import { Rect } from "./interfaces";
+import { Rect, Label, Anchor } from "./interfaces";
 
 export function getRandomIndex(arrayLength: number): number {
   return Math.floor(Math.random() * arrayLength);
@@ -43,4 +43,73 @@ export function rectOverlap(rectA: Rect, rectB: Rect): number {
   );
 
   return xOverlap * yOverlap;
+}
+
+export function getLabelAnchorRootOverlap(
+  label: Label,
+  anchor: Anchor,
+  labelMargin: number,
+  anchorMargin: number,
+): number {
+  return rectOverlap(
+    {
+      x1: label.x - labelMargin,
+      y1: label.y - labelMargin,
+      x2: label.x + label.width + labelMargin,
+      y2: label.y + label.height + labelMargin,
+    },
+    {
+      x1: anchor.x - anchorMargin,
+      y1: anchor.y - anchorMargin,
+      x2: anchor.x + anchorMargin,
+      y2: anchor.y + anchorMargin,
+    },
+  );
+}
+
+export function getLabelLabelOverlap(
+  labelA: Label,
+  labelB: Label,
+  labelMargin: number,
+): number {
+  return rectOverlap(
+    {
+      x1: labelA.x - labelMargin,
+      y1: labelA.y - labelMargin,
+      x2: labelA.x + labelA.width + labelMargin,
+      y2: labelA.y + labelA.height + labelMargin,
+    },
+    {
+      x1: labelB.x - labelMargin,
+      y1: labelB.y - labelMargin,
+      x2: labelB.x + labelB.width + labelMargin,
+      y2: labelB.y + labelB.height + labelMargin,
+    },
+  );
+}
+
+export function getLabelAnchorDx(label: Label, anchor: Anchor): number {
+  const dimensionX = label.x < anchor.x ? label.width : 0;
+
+  return Math.abs(label.x + dimensionX - anchor.x);
+}
+
+export function getLabelAnchorDy(label: Label, anchor: Anchor): number {
+  const dimensionY = label.y < anchor.y ? label.height : 0;
+
+  return Math.abs(label.y + dimensionY - anchor.y);
+}
+
+export function getLabelAnchorDistance(label: Label, anchor: Anchor): number {
+  const dx = getLabelAnchorDx(label, anchor);
+  const dy = getLabelAnchorDx(label, anchor);
+
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+export function isPositionOrthogonal(label: Label, anchor: Anchor): boolean {
+  const dx = getLabelAnchorDx(label, anchor);
+  const dy = getLabelAnchorDy(label, anchor);
+
+  return Math.round(dx) === Math.round(dy);
 }

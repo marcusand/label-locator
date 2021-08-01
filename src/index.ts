@@ -1,5 +1,12 @@
 import { Weights, OverlapsRemoveArgs, OverlapsRemoveReturn } from "./interfaces";
-import { rectOverlap, coolingSchedule, getRandomIndex } from "./lib";
+import {
+  coolingSchedule,
+  getRandomIndex,
+  getLabelAnchorDistance,
+  getLabelLabelOverlap,
+  getLabelAnchorRootOverlap,
+  isPositionOrthogonal,
+} from "./lib";
 
 const weightDefaults: Weights = {
   labelAnchorDistance: 0.1,
@@ -47,85 +54,12 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     return false;
   };
 
-  const getLabelAnchorRootOverlap = (
-    indexLabel: number,
-    indexAnchor?: number,
-  ): number => {
-    const label = labels[indexLabel];
-    const anchor = anchors[indexAnchor ?? indexLabel];
-
-    return rectOverlap(
-      {
-        x1: label.x - labelMargin,
-        y1: label.y - labelMargin,
-        x2: label.x + label.width + labelMargin,
-        y2: label.y + label.height + labelMargin,
-      },
-      {
-        x1: anchor.x - anchorMargin,
-        y1: anchor.y - anchorMargin,
-        x2: anchor.x + anchorMargin,
-        y2: anchor.y + anchorMargin,
-      },
-    );
-  };
-
-  const getLabelLabelOverlap = (indexA: number, indexB: number): number => {
-    const labelA = labels[indexA];
-    const labelB = labels[indexB];
-
-    return rectOverlap(
-      {
-        x1: labelA.x - labelMargin,
-        y1: labelA.y - labelMargin,
-        x2: labelA.x + labelA.width + labelMargin,
-        y2: labelA.y + labelA.height + labelMargin,
-      },
-      {
-        x1: labelB.x - labelMargin,
-        y1: labelB.y - labelMargin,
-        x2: labelB.x + labelB.width + labelMargin,
-        y2: labelB.y + labelB.height + labelMargin,
-      },
-    );
-  };
-
-  const getLabelAnchorDx = (index: number) => {
-    const label = labels[index];
-    const anchor = anchors[index];
-    const dimensionX = label.x < anchor.x ? label.width : 0;
-
-    return Math.abs(label.x + dimensionX - anchor.x);
-  };
-
-  const getLabelAnchorDy = (index: number) => {
-    const label = labels[index];
-    const anchor = anchors[index];
-    const dimensionY = label.y < anchor.y ? label.height : 0;
-
-    return Math.abs(label.y + dimensionY - anchor.y);
-  };
-
-  const getLabelAnchorDistance = (index: number) => {
-    const dx = getLabelAnchorDx(index);
-    const dy = getLabelAnchorDx(index);
-
-    return Math.sqrt(dx * dx + dy * dy);
-  };
-
-  const hasValidPosition = (index: number): boolean => {
-    if (!onlyMoveOrthogonally) return true;
-
-    const dx = getLabelAnchorDx(index);
-    const dy = getLabelAnchorDy(index);
-
-    return Math.round(dx) === Math.round(dy);
-  };
-
   const energy = (index: number): number => {
+    const anchor = anchors[index];
+    const label = labels[index];
     let energy = 0;
 
-    const anchorLabelDistance = getLabelAnchorDistance(index);
+    const anchorLabelDistance = getLabelAnchorDistance(label, anchor);
     const deviationFromPreferredDistance = Math.abs(
       anchorLabelDistance - preferredDistance,
     );
@@ -139,20 +73,28 @@ export default function overlapsRemove(args: OverlapsRemoveArgs): OverlapsRemove
     }
 
     // label anchor root penalty
-    energy += getLabelAnchorRootOverlap(index) * weights.labelOwnAnchorOverlap;
+    energy +=
+      getLabelAnchorRootOverlap(label, anchor, labelMargin, anchorMargin) *
+      weights.labelOwnAnchorOverlap;
 
-    labels.forEach((label, i) => {
+    labels.forEach((currLabel, i) => {
       if (index === i) return;
+      const currAnchor = anchors[i];
 
-      const labelLabelOverlap = getLabelLabelOverlap(index, i);
-      const labelAnchorOverlap = getLabelAnchorRootOverlap(index, i);
+      const labelLabelOverlap = getLabelLabelOverlap(label, currLabel, labelMargin);
+      const labelAnchorOverlap = getLabelAnchorRootOverlap(
+        label,
+        currAnchor,
+        labelMargin,
+        anchorMargin,
+      );
 
       energy += labelLabelOverlap * weights.labelLabelOverlap;
       energy += labelAnchorOverlap * weights.labelAnchorOverlap;
     });
 
     // check if valid position
-    if (!hasValidPosition(index)) {
+    if (onlyMoveOrthogonally && !isPositionOrthogonal(label, anchor)) {
       energy *= 30;
     }
 
