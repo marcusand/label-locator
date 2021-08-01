@@ -3,6 +3,14 @@
   "version": "0.0.2",
   "description": "Automatically place labels in a graph.",
   "main": "build/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcusand/label-locator"
+  },
+  "homepage": "https://github.com/marcusand/label-locator",
+  "bugs": {
+    "url": "https://github.com/marcusand/label-locator"
+  },
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
