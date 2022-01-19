@@ -73,6 +73,8 @@ export default function overlapsRemove(args) {
         // select random label
         const index = getRandomIndex(labels.length);
         const label = labels[index];
+        if (label.fixed)
+            return;
         const xOld = label.x;
         const yOld = label.y;
         const oldEnergy = energy(index);

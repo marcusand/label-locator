@@ -10,6 +10,7 @@ export interface Label {
     width: number;
     height: number;
     energyFactor?: number;
+    fixed?: boolean;
 }
 export interface Anchor {
     x: number;
